@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Password Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <link rel="icon" href="https://raw.githubusercontent.com/finnapple/GhostLAN/refs/heads/main/ghost.png" type="image/png" />
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        font-family: 'JetBrains Mono', 'Courier New', monospace;
+        background-color: #ffffff;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        color: #000000;
+        position: fixed;
+        width: 100%;
+      }
+
+      .app-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        width: 100%;
+        background-color: #fff;
+        position: relative;
+        border: 2px solid #000000;
+      }
+
+      /* Header Styles */
+      .header {
+        padding: 15px 20px;
+        background: #f5f5f5;
+        color: #000000;
+        text-align: left;
+        font-weight: 400;
+        display: flex;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        border-bottom: 2px solid #000000;
+        font-size: 14px;
+        user-select: none;
+      }
+
+      .header h1 {
+        font-size: 18px;
+        margin: 0;
+        flex-grow: 1;
+        font-weight: 400;
+      }
+
+      .header h1::before {
+        color: #666;
+      }
+
+      /* Password display area */
+      #password-display {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background: #fff;
+        -webkit-overflow-scrolling: touch;
+        position: relative;
+        scroll-behavior: smooth;
+      }
+
+      .password-item {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: flex-start;
+        animation: terminalType 0.5s ease;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px;
+      }
+
+      .password-content {
+        background: #f5f5f5;
+        padding: 10px;
+        border: 1px solid #000;
+        width: 100%;
+        font-family: 'JetBrains Mono', monospace;
+        position: relative;
+      }
+
+      .copy-button {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: 1px solid #000;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+      }
+
+      .copy-button:hover {
+        background: #000;
+        color: #fff;
+      }
+
+      /* Modify input area for password options */
+      .input-area {
+        background-color: #f5f5f5;
+        padding: 16px 20px;
+        border-top: 2px solid #000;
+      }
+
+      .password-options {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .option-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+      }
+
+      .length-slider {
+        width: 100%;
+        margin: 10px 0;
+      }
+
+      #generateButton {
+        width: 100%;
+        padding: 10px;
+        background: transparent;
+        border: 1px solid #000;
+        font-family: 'JetBrains Mono', monospace;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      #generateButton:hover {
+        background: #000;
+        color: #fff;
+      }
+
+      /* Terminal cursor animation */
+      .terminal-cursor {
+        display: inline-block;
+        background-color: rgb(255, 255, 255);
+        width: 8px;
+        height: 14px;
+        animation: blink 1s step-end infinite;
+      }
+
+      @keyframes blink {
+
+        0%,
+        50% {
+          opacity: 1;
+        }
+
+        51%,
+        100% {
+          opacity: 0;
+        }
+      }
+
+      /* Desktop specific styles */
+      @media (min-width: 768px) {
+        .app-container {
+          max-width: 800px;
+          height: 90vh;
+          margin: 5vh auto;
+          border-radius: 0;
+          overflow: hidden;
+          border: 2px solid #000000;
+        }
+
+        .header {
+          padding: 15px 20px;
+          border-radius: 0;
+          border-bottom: 2px solid #000000;
+          justify-content: space-between;
+        }
+
+        .header h1 {
+          display: inline-block;
+          vertical-align: middle;
+          margin: 0;
+          font-size: 18px;
+          font-weight: 400;
+          flex-grow: 1;
+        }
+
+        #password-display {
+          padding: 25px 25px 80px 25px;
+          flex: 1;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .input-area {
+          padding: 16px 20px;
+          border-top: 2px solid #000;
+          border-radius: 0;
+        }
+
+        .password-content {
+          padding: 12px;
+          font-size: 13px;
+        }
+
+        .copy-button {
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          min-width: 80px;
+        }
+      }
+
+      /* Mobile specific styles */
+      @media (max-width: 767px) {
+        body {
+          position: relative;
+          overflow: auto;
+          min-height: 100vh;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .app-container {
+          height: 100vh;
+          border: none;
+          padding-top: 52px;
+          /* Height of fixed header */
+          padding-bottom: 190px;
+          /* Height of fixed input area */
+        }
+
+        .header {
+          padding: 12px 15px;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 999;
+          background: #f5f5f5;
+          height: 52px;
+          border-bottom: 1px solid #ddd;
+        }
+
+        #password-display {
+          padding: 15px;
+          flex: 1;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          height: calc(100vh - 242px);
+          /* Viewport - (header + input area) */
+          position: relative;
+          touch-action: pan-y;
+        }
+
+        .input-area {
+          padding: 12px 15px;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: #f5f5f5;
+          z-index: 999;
+          border-top: 1px solid #ddd;
+          height: 190px;
+        }
+
+        .password-content {
+          padding: 12px;
+          font-size: 11px;
+          word-break: break-all;
+          line-height: 1.4;
+          margin-bottom: 8px;
+        }
+
+        .copy-button {
+          position: relative;
+          display: block;
+          width: 100%;
+          margin-top: 8px;
+          right: auto;
+          top: auto;
+          transform: none;
+          padding: 8px;
+          font-size: 11px;
+        }
+      }
+
+      /* Enhanced Scrollbar Styling */
+      #password-display::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      #password-display::-webkit-scrollbar-track {
+        background: #f5f5f5;
+        border-radius: 0;
+      }
+
+      #password-display::-webkit-scrollbar-thumb {
+        background: #aaa;
+        border-radius: 0;
+        border: 1px solid #ddd;
+      }
+
+      #password-display::-webkit-scrollbar-thumb:hover {
+        background: #888;
+      }
+
+      #password-display::-webkit-scrollbar-thumb:active {
+        background: #666;
+      }
+
+      /* For Firefox */
+      #password-display {
+        scrollbar-width: thin;
+        scrollbar-color: #aaa #f5f5f5;
+      }
+
+      /* Loading animation for messages */
+      .loading-message {
+        color: #666;
+        font-style: italic;
+      }
+
+      .loading-message::after {
+        content: '';
+        display: inline-block;
+        width: 8px;
+        height: 14px;
+        background: #666;
+        animation: blink 1s step-end infinite;
+        margin-left: 4px;
+      }
+
+      /* Terminal welcome message styling */
+      .terminal-welcome {
+        color: #666;
+        font-size: 11px;
+        margin-bottom: 10px;
+        border-left: 2px solid #ccc;
+        padding-left: 10px;
+      }
+
+      /* Scroll to bottom indicator */
+      .scroll-indicator {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background: #007700;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        cursor: pointer;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 50;
+        border: 1px solid #005500;
+      }
+
+      .scroll-indicator.visible {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .scroll-indicator:hover {
+        background: #005500;
+      }
+
+      .header,
+      .header *,
+      .auth-footer {
+        user-select: none;
+      }
+
+      .header img[alt="GhostLAN ghost logo"] {
+        pointer-events: none;
+        -webkit-user-drag: none;
+        user-drag: none;
+      }
+
+      .input-label,
+      #nameInput,
+      #messageInput,
+      #sendButton {
+        user-select: none;
+      }
+
+      /* Drop overlay for drag & drop uploads */
+      .drop-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s ease, background-color 0.15s ease;
+        z-index: 40;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 14px;
+        color: #004400;
+      }
+
+      .drop-overlay.visible {
+        pointer-events: auto;
+        opacity: 1;
+        background-color: rgba(0, 119, 0, 0.06);
+      }
+
+      /* Add slight highlight when dragging over chat */
+      #password-display.drag-over {
+        outline: 2px dashed rgba(0, 119, 0, 0.6);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="header">
+        <img src="https://raw.githubusercontent.com/finnapple/GhostLAN/refs/heads/main/ghost.png" alt="Password Generator Logo" style="height:28px;width:28px;margin-right:10px;vertical-align:middle;">
+        <h1>Password Generator</h1>
+      </div>
+      <div id="password-display"></div>
+      <div class="input-area">
+        <div class="password-options">
+          <div class="option-checkbox">
+            <input type="checkbox" id="uppercase" checked>
+            <label for="uppercase">Uppercase</label>
+          </div>
+          <div class="option-checkbox">
+            <input type="checkbox" id="lowercase" checked>
+            <label for="lowercase">Lowercase</label>
+          </div>
+          <div class="option-checkbox">
+            <input type="checkbox" id="numbers" checked>
+            <label for="numbers">Numbers</label>
+          </div>
+          <div class="option-checkbox">
+            <input type="checkbox" id="symbols" checked>
+            <label for="symbols">Symbols</label>
+          </div>
+        </div>
+        <div class="length-container">
+          <label for="length">Password Length: <span id="lengthValue">12</span>
+          </label>
+          <input type="range" id="length" min="8" max="64" value="12" class="length-slider">
+        </div>
+        <button id="generateButton">Generate Password</button>
+      </div>
+    </div>
+    <script>
+      // Password generation function
+      function generatePassword(options) {
+        const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const lowercase = "abcdefghijklmnopqrstuvwxyz";
+        const numbers = "0123456789";
+        const symbols = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+        let chars = "";
+        if (options.uppercase) chars += uppercase;
+        if (options.lowercase) chars += lowercase;
+        if (options.numbers) chars += numbers;
+        if (options.symbols) chars += symbols;
+        let password = "";
+        for (let i = 0; i < options.length; i++) {
+          password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return password;
+      }
+      // Display generated password
+      function displayPassword(password) {
+        const display = document.getElementById('password-display');
+        const passwordItem = document.createElement('div');
+        passwordItem.className = 'password-item';
+        const content = document.createElement('div');
+        content.className = 'password-content';
+        content.textContent = password;
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-button';
+        copyBtn.textContent = 'Copy';
+        copyBtn.onclick = async () => {
+          try {
+            // Try modern clipboard API first
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              await navigator.clipboard.writeText(password);
+              copyBtn.textContent = 'Copied!';
+              setTimeout(() => copyBtn.textContent = 'Copy', 2000);
+              return;
+            }
+            // Fallback for older browsers/mobile
+            const textArea = document.createElement('textarea');
+            textArea.value = password;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            textArea.setSelectionRange(0, 99999); // For mobile
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => copyBtn.textContent = 'Copy', 2000);
+          } catch (err) {
+            console.error('Copy failed', err);
+            copyBtn.textContent = 'Copy failed';
+            setTimeout(() => copyBtn.textContent = 'Copy', 2000);
+          }
+        };
+        content.appendChild(copyBtn);
+        passwordItem.appendChild(content);
+        display.appendChild(passwordItem);
+        display.scrollTop = display.scrollHeight;
+      }
+      // Core event listeners
+      document.getElementById('generateButton').addEventListener('click', () => {
+        const options = {
+          uppercase: document.getElementById('uppercase').checked,
+          lowercase: document.getElementById('lowercase').checked,
+          numbers: document.getElementById('numbers').checked,
+          symbols: document.getElementById('symbols').checked,
+          length: parseInt(document.getElementById('length').value)
+        };
+        const password = generatePassword(options);
+        displayPassword(password);
+      });
+      document.getElementById('length').addEventListener('input', (e) => {
+        document.getElementById('lengthValue').textContent = e.target.value;
+      });
+    </script>
+  </body>
+</html>
