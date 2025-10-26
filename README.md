@@ -16,6 +16,6 @@ A simple and responsive **Password Generator** built with HTML, CSS, and JavaScr
 4. Click **Copy** to copy the result  
 
 ## Author
-Created by [finnapple](https://github.com/Finnapple)
+Created by [Finnapple](https://github.com/Finnapple)
 
 ## Access the website here: https://passwordgeneratorofficial.netlify.app/
